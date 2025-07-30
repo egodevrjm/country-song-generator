@@ -403,7 +403,150 @@ function updateWizardVocalStyleInfo() {
     }
 }
 
-async function generateRandomThemeWizard() {
+async function letClaudeDecide() {
+    // Save current data first
+    saveWizardStepData(2);
+    
+    // Get current settings
+    const styleValue = parseInt(wizardData.styleValue);
+    const theme = wizardData.theme.toLowerCase();
+    const subgenre = wizardData.subgenre;
+    const mood = wizardData.mood;
+    const vocalStyle = wizardData.vocalStyle;
+    
+    // Clear current additional notes
+    const notesField = document.getElementById('wizardAdditionalNotes');
+    notesField.value = '';
+    
+    // Arrays to collect selected items
+    let selectedItems = [];
+    
+    // Instrument selection based on sub-genre
+    if (subgenre === 'Traditional Country') {
+        selectedItems.push('Acoustic guitar', 'Fiddle', 'Pedal steel', 'Upright bass');
+    } else if (subgenre === 'Pop Country') {
+        selectedItems.push('Electric guitar', 'Drums', 'Synth pads', '808 bass');
+        if (mood === 'upbeat and celebratory') {
+            selectedItems.push('Gang vocals', 'Hand claps');
+        }
+    } else if (subgenre === 'Bluegrass') {
+        selectedItems.push('Banjo', 'Mandolin', 'Fiddle', 'Upright bass', 'Dobro');
+    } else if (subgenre === 'Outlaw Country') {
+        selectedItems.push('Electric guitar', 'Harmonica', 'Drums', 'Hammond organ');
+    } else if (subgenre === 'Country Rock') {
+        selectedItems.push('Electric guitar', 'Drums', 'Hammond organ', 'Slide guitar');
+    } else if (subgenre === 'Americana') {
+        selectedItems.push('Acoustic guitar', 'Harmonica', 'Piano', 'Fiddle');
+    } else if (subgenre === 'Honky-Tonk') {
+        selectedItems.push('Piano', 'Pedal steel', 'Electric guitar', 'Upright bass');
+    } else if (subgenre === 'Country Rap') {
+        selectedItems.push('808 bass', 'Trap drums', 'Synth pads', 'Auto-tune');
+    } else {
+        // Default mix based on style
+        if (styleValue <= 40) {
+            selectedItems.push('Electric guitar', 'Drums', 'Synth pads');
+        } else {
+            selectedItems.push('Acoustic guitar', 'Fiddle', 'Piano');
+        }
+    }
+    
+    // Tempo and key based on mood and style
+    if (mood === 'upbeat and celebratory' || mood === 'humorous and playful') {
+        selectedItems.push('Upbeat (110-130 BPM)', 'Key of G');
+        if (styleValue <= 40) {
+            selectedItems.push('Key change in final chorus');
+        }
+    } else if (mood === 'heartbroken and melancholic' || mood === 'introspective and thoughtful') {
+        selectedItems.push('Slow tempo (70-90 BPM)', 'Key of Em', 'Minor key');
+        if (styleValue > 60) {
+            selectedItems.push('Rubato intro');
+        }
+    } else if (mood === 'nostalgic and reflective') {
+        selectedItems.push('Mid-tempo (90-110 BPM)', 'Key of D', 'Waltz time (3/4)');
+    } else if (mood === 'rebellious and defiant') {
+        selectedItems.push('Fast (130+ BPM)', 'Key of A', 'Double-time feel');
+    } else if (mood === 'romantic and tender') {
+        selectedItems.push('Ballad (60-70 BPM)', 'Key of C', '6/8 time signature');
+    } else {
+        selectedItems.push('Mid-tempo (90-110 BPM)', 'Key of G');
+    }
+    
+    // Vocal style additions
+    if (vocalStyle === 'duet') {
+        selectedItems.push('Call and response', 'A cappella section');
+    } else if (vocalStyle === 'female') {
+        selectedItems.push('Key of F', 'Gospel choir');
+    }
+    
+    // Keywords based on theme and style
+    const themeKeywords = {
+        // Places
+        'town': ['Small town life', 'Water tower', 'Courthouse', 'Diner', 'Small town gossip'],
+        'home': ['Coming home', 'Front porch', 'Porch sitting', 'Family traditions'],
+        'road': ['Dirt road', 'Backroads', 'Road trip', 'Pickup truck'],
+        'farm': ['Farmer', 'Tractor', 'Cornfield', 'Harvest time', 'Planting season'],
+        
+        // Emotions/Events
+        'love': ['First love', 'Lost love', 'Stars', 'Moonlight', 'Wedding'],
+        'heart': ['Heartbreak', 'Divorce', 'Blue jeans', 'Whiskey'],
+        'party': ['Party anthem', 'Bonfire', 'Tailgate', 'Friday night', 'Beer'],
+        'memory': ['Nostalgia', 'Summer memories', 'High school days', 'Graduation'],
+        
+        // Time
+        'night': ['Friday night', 'Moonlight', 'Stars', 'Star gazing', 'Bonfire'],
+        'summer': ['Summer memories', 'River', 'Fishing', 'County fair'],
+        'morning': ['Coffee pot', 'Sunrise', 'Work boots', 'Working hard'],
+        
+        // Nature
+        'rain': ['Thunderstorm', 'Muddy creek', 'River'],
+        'sun': ['Sunset', 'Drought', 'Harvest moon']
+    };
+    
+    // Add keywords based on theme
+    Object.keys(themeKeywords).forEach(keyword => {
+        if (theme.includes(keyword)) {
+            selectedItems.push(...themeKeywords[keyword].slice(0, 3)); // Add first 3 matches
+        }
+    });
+    
+    // Style-based additions
+    if (styleValue <= 30) {
+        // Radio hit style - add party/fun elements
+        selectedItems.push('Pickup truck', 'Tailgate', 'Blue jeans', 'Friday night', 'Party anthem');
+    } else if (styleValue >= 70) {
+        // Story song style - add narrative elements
+        selectedItems.push('Grandpa\'s wisdom', 'Mama\'s prayers', 'Church bells', 'Cemetery', 'Redemption');
+    }
+    
+    // Regional elements based on sub-genre
+    if (subgenre === 'Bluegrass' || theme.includes('mountain') || theme.includes('appalachian')) {
+        selectedItems.push('Appalachian pride', 'Pine woods', 'Limestone cliff');
+    } else if (theme.includes('texas') || theme.includes('cowboy')) {
+        selectedItems.push('Texas sized', 'Cowboy boots', 'Two-stepping');
+    } else if (theme.includes('nashville') || theme.includes('music')) {
+        selectedItems.push('Nashville dreams', 'Radio', 'Guitar');
+    }
+    
+    // Modern elements for contemporary styles
+    if (subgenre === 'Pop Country' || subgenre === 'Country Rap') {
+        selectedItems.push('Social media drama', 'Online dating', 'Video calls home');
+    }
+    
+    // Remove duplicates and join
+    selectedItems = [...new Set(selectedItems)];
+    notesField.value = selectedItems.join(', ');
+    
+    // Visual feedback
+    notesField.style.backgroundColor = '#fffacd';
+    setTimeout(() => {
+        notesField.style.backgroundColor = '';
+    }, 500);
+    
+    // Show notification
+    showNotification('Claude has selected options based on your song configuration!', 'success');
+}
+
+function generateRandomThemeWizard() {
     if (!hasApiKey) {
         showNotification('Please set your Claude API key in Settings', 'error');
         return;
