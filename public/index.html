@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex Wilson Country Song Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar for History -->
+        <aside class="history-sidebar" id="historySidebar">
+            <div class="history-header">
+                <h3><i class="fas fa-history"></i> Song History</h3>
+                <button class="close-history" onclick="toggleHistory()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="history-controls">
+                <input type="text" id="historySearch" placeholder="Search songs..." onkeyup="filterHistory()">
+                <button class="clear-history-btn" onclick="clearAllHistory()">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+            <div class="history-list" id="historyList">
+                <p class="no-history">No songs generated yet</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="app-header">
+                <button class="menu-btn" onclick="toggleHistory()">
+                    <i class="fas fa-bars"></i>
+                    <span class="history-count" id="historyCount" style="display: none;">0</span>
+                </button>
+                <div class="header-content">
+                    <div class="logo-section">
+                        <div class="guitar-icon">
+                            <i class="fas fa-guitar"></i>
+                        </div>
+                        <div>
+                            <h1>Alex Wilson</h1>
+                            <p class="tagline">Country Song Generator</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="settings-btn" onclick="openSettings()" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+            </header>
+
+            <div class="container">
+                <!-- Settings Modal -->
+                <div id="settingsModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2><i class="fas fa-cog"></i> Settings</h2>
+                            <button class="modal-close" onclick="closeSettings()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- API Configuration moved here -->
+                            <div class="settings-section">
+                                <h3><i class="fas fa-key"></i> API Configuration</h3>
+                                <div class="form-group">
+                                    <label for="settingsApiKey">Claude API Key</label>
+                                    <div class="input-group">
+                                        <input type="password" id="settingsApiKey" placeholder="Enter your Anthropic API key">
+                                        <button id="saveSettingsKeyBtn" onclick="saveApiKeyFromSettings()" class="btn-primary">
+                                            <i class="fas fa-save"></i> Save Key
+                                        </button>
+                                    </div>
+                                    <small class="hint">Your API key is stored securely on the server</small>
+                                    <div id="apiKeyStatus" class="api-key-status"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Interface Mode -->
+                            <div class="settings-section">
+                                <h3><i class="fas fa-layer-group"></i> Interface Mode</h3>
+                                <div class="form-group">
+                                    <label>Choose your preferred creation mode:</label>
+                                    <div class="mode-selector">
+                                        <button class="mode-btn" id="wizardModeBtn" onclick="setInterfaceMode('wizard')">
+                                            <i class="fas fa-magic"></i>
+                                            <span>Wizard Mode</span>
+                                            <small>Step-by-step guided creation</small>
+                                        </button>
+                                        <button class="mode-btn" id="classicModeBtn" onclick="setInterfaceMode('classic')">
+                                            <i class="fas fa-list"></i>
+                                            <span>Classic Mode</span>
+                                            <small>All options on one page</small>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Section -->
+                <div class="hero-section">
+                    <h2 class="hero-title">Create Your Next Hit</h2>
+                    <p class="hero-subtitle">Craft authentic country songs with AI-powered creativity inspired by Pike County's finest traditions</p>
+                    <div class="interface-toggle">
+                        <button class="toggle-mode-btn" onclick="toggleInterfaceMode()">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span id="modeToggleText">Switch to Wizard Mode</span>
+                        </button>
+                    </div>
+                </div>
+        
+                <!-- Info Section -->
+                <div class="info-card">
+                    <details class="modern-details">
+                        <summary>
+                            <i class="fas fa-info-circle"></i>
+                            <span>About Alex Wilson</span>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </summary>
+                        <div class="alex-info">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <i class="fas fa-user"></i>
+                                    <div>
+                                        <h4>The Artist</h4>
+                                        <p>Alexander "Alex" Wilson is a country singer-songwriter from Pike County, Kentucky, born July 12, 2005 in Pikeville. With a deep, gravel-warm voice reminiscent of Johnny Cash and Chris Stapleton.</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-music"></i>
+                                    <div>
+                                        <h4>The Style</h4>
+                                        <p>Three chords and the truth, with memorable hooks and authentic Appalachian storytelling. Features concrete imagery—rust on fenders, dime-store rings, creaky porches.</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-star"></i>
+                                    <div>
+                                        <h4>Signature Songs</h4>
+                                        <p>"Tin Band Dreams," "Biscuits & Regret," "Digital Bonfire," "Barstool Confessions," "Check Engine Light Love"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+        
+                <!-- Wizard Interface -->
+                <div id="wizardInterface" class="wizard-container" style="display: none;">
+                    <!-- Progress Bar -->
+                    <div class="wizard-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-steps">
+                            <div class="step active" id="step1">
+                                <div class="step-number">1</div>
+                                <div class="step-label">Style & Theme</div>
+                            </div>
+                            <div class="step" id="step2">
+                                <div class="step-number">2</div>
+                                <div class="step-label">Genre & Mood</div>
+                            </div>
+                            <div class="step" id="step3">
+                                <div class="step-number">3</div>
+                                <div class="step-label">Details</div>
+                            </div>
+                            <div class="step" id="step4">
+                                <div class="step-number">4</div>
+                                <div class="step-label">Review</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Style & Theme -->
+                    <div class="wizard-step" id="wizardStep1">
+                        <div class="wizard-card">
+                            <h3><i class="fas fa-balance-scale"></i> Choose Your Style & Theme</h3>
+                            
+                            <div class="form-group">
+                                <label for="wizardStyleSlider">
+                                    <i class="fas fa-balance-scale"></i>
+                                    Song Style: <span id="wizardStyleLabel" class="style-badge">Balanced</span>
+                                </label>
+                                <div class="modern-slider-container">
+                                    <div class="slider-wrapper">
+                                        <div class="slider-track">
+                                            <input type="range" id="wizardStyleSlider" min="0" max="100" value="50" oninput="updateWizardStyleLabel()">
+                                            <div class="slider-fill" id="wizardSliderFill"></div>
+                                        </div>
+                                        <div class="slider-labels">
+                                            <span class="slider-label">
+                                                <i class="fas fa-broadcast-tower"></i>
+                                                <span>Radio Hit</span>
+                                            </span>
+                                            <span class="slider-label">
+                                                <i class="fas fa-book-open"></i>
+                                                <span>Story Song</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div id="wizardStyleDescription" class="style-description">
+                                        <p><strong>Balanced (50):</strong> Equal focus on catchy hooks and meaningful storytelling</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="wizardTheme">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Song Theme/Concept
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" id="wizardTheme" placeholder="e.g., Small town Saturday night, Lost love at the county fair" class="modern-input">
+                                    <button onclick="generateRandomThemeWizard()" class="btn-secondary">
+                                        <i class="fas fa-dice"></i> Random
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Genre & Mood -->
+                    <div class="wizard-step" id="wizardStep2" style="display: none;">
+                        <div class="wizard-card">
+                            <h3><i class="fas fa-music"></i> Select Genre & Mood</h3>
+                            
+                            <div class="form-group">
+                                <label for="wizardSubgenre">
+                                    <i class="fas fa-music"></i>
+                                    Sub-genre
+                                </label>
+                                <select id="wizardSubgenre" class="modern-select">
+                                    <option value="">Let Claude decide</option>
+                                    <option value="Pop Country">Pop Country</option>
+                                    <option value="Traditional Country">Traditional Country</option>
+                                    <option value="Bluegrass">Bluegrass</option>
+                                    <option value="Outlaw Country">Outlaw Country</option>
+                                    <option value="Country Rock">Country Rock</option>
+                                    <option value="Americana">Americana</option>
+                                    <option value="Honky-Tonk">Honky-Tonk</option>
+                                    <option value="Country Rap">Country Rap</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="wizardMood">
+                                    <i class="fas fa-heart"></i>
+                                    Mood/Emotion
+                                </label>
+                                <select id="wizardMood" class="modern-select">
+                                    <option value="">Let Claude decide</option>
+                                    <option value="upbeat and celebratory">Upbeat & Celebratory</option>
+                                    <option value="nostalgic and reflective">Nostalgic & Reflective</option>
+                                    <option value="heartbroken and melancholic">Heartbroken & Melancholic</option>
+                                    <option value="rebellious and defiant">Rebellious & Defiant</option>
+                                    <option value="romantic and tender">Romantic & Tender</option>
+                                    <option value="humorous and playful">Humorous & Playful</option>
+                                    <option value="introspective and thoughtful">Introspective & Thoughtful</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="wizardVocalStyle">
+                                    <i class="fas fa-microphone"></i>
+                                    Vocal Style
+                                </label>
+                                <select id="wizardVocalStyle" onchange="updateWizardVocalStyleInfo()" class="modern-select">
+                                    <option value="">Let Claude decide</option>
+                                    <option value="male">Male Vocals</option>
+                                    <option value="female">Female Vocals</option>
+                                    <option value="duet">Duet (Male & Female)</option>
+                                </select>
+                                <small id="wizardVocalStyleInfo" class="hint" style="display: none;">
+                                    Duet parts will be color-coded: <span style="color: #1E90FF;">Male</span>, <span style="color: #DC143C;">Female</span>, <span style="color: #8B4513;">Both</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Details -->
+                    <div class="wizard-step" id="wizardStep3" style="display: none;">
+                        <div class="wizard-card">
+                            <h3><i class="fas fa-sliders-h"></i> Add Details (Optional)</h3>
+                            <p class="wizard-hint">Click any elements below to add them to your song</p>
+                            
+                            <div class="wizard-tabs">
+                                <button class="tab-btn active" onclick="showWizardTab('instruments')">Instruments</button>
+                                <button class="tab-btn" onclick="showWizardTab('tempo')">Tempo & Key</button>
+                                <button class="tab-btn" onclick="showWizardTab('keywords')">Keywords</button>
+                                <button class="tab-btn" onclick="showWizardTab('topics')">Topics</button>
+                            </div>
+
+                            <div class="tab-content" id="wizardInstrumentsTab">
+                                <div class="pills-container">
+                                    <span class="pill" onclick="addToWizardNotes('Acoustic guitar')"><i class="fas fa-guitar"></i> Acoustic Guitar</span>
+                                    <span class="pill" onclick="addToWizardNotes('Electric guitar')"><i class="fas fa-bolt"></i> Electric Guitar</span>
+                                    <span class="pill" onclick="addToWizardNotes('Banjo')"><i class="fas fa-music"></i> Banjo</span>
+                                    <span class="pill" onclick="addToWizardNotes('Fiddle')"><i class="fas fa-violin"></i> Fiddle</span>
+                                    <span class="pill" onclick="addToWizardNotes('Pedal steel')"><i class="fas fa-sliders-h"></i> Pedal Steel</span>
+                                    <span class="pill" onclick="addToWizardNotes('Harmonica')"><i class="fas fa-music"></i> Harmonica</span>
+                                    <span class="pill" onclick="addToWizardNotes('Piano')"><i class="fas fa-keyboard"></i> Piano</span>
+                                    <span class="pill" onclick="addToWizardNotes('Drums')"><i class="fas fa-drum"></i> Drums</span>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="wizardTempoTab" style="display: none;">
+                                <div class="pills-container">
+                                    <span class="pill" onclick="addToWizardNotes('Slow tempo (70-90 BPM)')"><i class="fas fa-tachometer-alt"></i> Slow Tempo</span>
+                                    <span class="pill" onclick="addToWizardNotes('Mid-tempo (90-110 BPM)')"><i class="fas fa-tachometer-alt"></i> Mid Tempo</span>
+                                    <span class="pill" onclick="addToWizardNotes('Upbeat (110-130 BPM)')"><i class="fas fa-tachometer-alt"></i> Upbeat</span>
+                                    <span class="pill" onclick="addToWizardNotes('Key of G')"><i class="fas fa-music"></i> Key of G</span>
+                                    <span class="pill" onclick="addToWizardNotes('Key of C')"><i class="fas fa-music"></i> Key of C</span>
+                                    <span class="pill" onclick="addToWizardNotes('Key of D')"><i class="fas fa-music"></i> Key of D</span>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="wizardKeywordsTab" style="display: none;">
+                                <div class="pills-container">
+                                    <span class="pill" onclick="addToWizardNotes('Dirt road')"><i class="fas fa-road"></i> Dirt Road</span>
+                                    <span class="pill" onclick="addToWizardNotes('Pickup truck')"><i class="fas fa-truck"></i> Pickup Truck</span>
+                                    <span class="pill" onclick="addToWizardNotes('Bonfire')"><i class="fas fa-fire"></i> Bonfire</span>
+                                    <span class="pill" onclick="addToWizardNotes('Blue jeans')"><i class="fas fa-tshirt"></i> Blue Jeans</span>
+                                    <span class="pill" onclick="addToWizardNotes('Stars')"><i class="fas fa-star"></i> Stars</span>
+                                    <span class="pill" onclick="addToWizardNotes('Backroads')"><i class="fas fa-route"></i> Backroads</span>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="wizardTopicsTab" style="display: none;">
+                                <div class="pills-container">
+                                    <span class="pill" onclick="addToWizardNotes('Small town life')"><i class="fas fa-building"></i> Small Town Life</span>
+                                    <span class="pill" onclick="addToWizardNotes('First love')"><i class="fas fa-heart"></i> First Love</span>
+                                    <span class="pill" onclick="addToWizardNotes('Friday night')"><i class="fas fa-calendar-week"></i> Friday Night</span>
+                                    <span class="pill" onclick="addToWizardNotes('Coming home')"><i class="fas fa-home"></i> Coming Home</span>
+                                    <span class="pill" onclick="addToWizardNotes('Nostalgia')"><i class="fas fa-clock"></i> Nostalgia</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="wizardAdditionalNotes">
+                                    <i class="fas fa-sticky-note"></i>
+                                    Additional Notes
+                                </label>
+                                <textarea id="wizardAdditionalNotes" placeholder="Any specific requests or elements..." class="modern-textarea" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Review -->
+                    <div class="wizard-step" id="wizardStep4" style="display: none;">
+                        <div class="wizard-card">
+                            <h3><i class="fas fa-check-circle"></i> Review Your Song</h3>
+                            <div class="review-section">
+                                <div id="wizardReview" class="review-content">
+                                    <!-- Content will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="wizard-navigation">
+                        <button id="wizardPrevBtn" class="btn-secondary" onclick="previousStep()" style="display: none;">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button id="wizardNextBtn" class="btn-primary" onclick="nextStep()">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button id="wizardGenerateBtn" class="btn-generate" onclick="generateSongFromWizard()" style="display: none;">
+                            <i class="fas fa-magic"></i> Generate Song
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Classic Interface (existing form) -->
+                <div id="classicInterface">
+                    <!-- Song Configuration -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="fas fa-sliders-h"></i>
+                        <h3>Song Configuration</h3>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="styleSlider">
+                            <i class="fas fa-balance-scale"></i>
+                            Song Style: <span id="styleLabel" class="style-badge">Balanced</span>
+                        </label>
+                        <div class="modern-slider-container">
+                            <div class="slider-wrapper">
+                                <div class="slider-track">
+                                    <input type="range" id="styleSlider" min="0" max="100" value="50" oninput="updateStyleLabel()">
+                                    <div class="slider-fill" id="sliderFill"></div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span class="slider-label">
+                                        <i class="fas fa-broadcast-tower"></i>
+                                        <span>Radio Hit</span>
+                                    </span>
+                                    <span class="slider-label">
+                                        <i class="fas fa-book-open"></i>
+                                        <span>Story Song</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div id="styleDescription" class="style-description">
+                                <p><strong>Balanced (50):</strong> Equal focus on catchy hooks and meaningful storytelling</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="theme">
+                            <i class="fas fa-lightbulb"></i>
+                            Song Theme/Concept
+                        </label>
+                        <div class="input-group">
+                            <input type="text" id="theme" placeholder="e.g., Small town Saturday night, Lost love at the county fair" class="modern-input">
+                            <button id="randomThemeBtn" onclick="generateRandomTheme()" class="btn-secondary">
+                                <i class="fas fa-dice"></i> Random
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subgenre">
+                            <i class="fas fa-music"></i>
+                            Sub-genre
+                        </label>
+                        <select id="subgenre" class="modern-select">
+                            <option value="">Let Claude decide</option>
+                            <option value="Pop Country">Pop Country</option>
+                            <option value="Traditional Country">Traditional Country</option>
+                            <option value="Bluegrass">Bluegrass</option>
+                            <option value="Outlaw Country">Outlaw Country</option>
+                            <option value="Country Rock">Country Rock</option>
+                            <option value="Americana">Americana</option>
+                            <option value="Honky-Tonk">Honky-Tonk</option>
+                            <option value="Country Rap">Country Rap</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vocalStyle">
+                            <i class="fas fa-microphone"></i>
+                            Vocal Style
+                        </label>
+                        <select id="vocalStyle" onchange="updateVocalStyleInfo()" class="modern-select">
+                            <option value="">Let Claude decide</option>
+                            <option value="male">Male Vocals</option>
+                            <option value="female">Female Vocals</option>
+                            <option value="duet">Duet (Male & Female)</option>
+                        </select>
+                        <small id="vocalStyleInfo" class="hint" style="display: none;">
+                            Duet parts will be color-coded: <span style="color: #1E90FF;">Male</span>, <span style="color: #DC143C;">Female</span>, <span style="color: #8B4513;">Both</span>
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mood">
+                            <i class="fas fa-heart"></i>
+                            Mood/Emotion
+                        </label>
+                        <select id="mood" class="modern-select">
+                            <option value="">Let Claude decide</option>
+                            <option value="upbeat and celebratory">Upbeat & Celebratory</option>
+                            <option value="nostalgic and reflective">Nostalgic & Reflective</option>
+                            <option value="heartbroken and melancholic">Heartbroken & Melancholic</option>
+                            <option value="rebellious and defiant">Rebellious & Defiant</option>
+                            <option value="romantic and tender">Romantic & Tender</option>
+                            <option value="humorous and playful">Humorous & Playful</option>
+                            <option value="introspective and thoughtful">Introspective & Thoughtful</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="additionalNotes">
+                            <i class="fas fa-sticky-note"></i>
+                            Additional Notes <span class="optional">(optional)</span>
+                        </label>
+                        <small class="hint">Click elements to add them:</small>
+                        
+                        <div class="instrument-section">
+                            <h4>Instruments & Vocals</h4>
+                            <div class="pills-container">
+                                <span class="pill" onclick="addToNotes('Acoustic guitar')"><i class="fas fa-guitar"></i> Acoustic Guitar</span>
+                                <span class="pill" onclick="addToNotes('Electric guitar')"><i class="fas fa-bolt"></i> Electric Guitar</span>
+                                <span class="pill" onclick="addToNotes('Banjo')"><i class="fas fa-music"></i> Banjo</span>
+                                <span class="pill" onclick="addToNotes('Fiddle')"><i class="fas fa-violin"></i> Fiddle</span>
+                                <span class="pill" onclick="addToNotes('Pedal steel')"><i class="fas fa-sliders-h"></i> Pedal Steel</span>
+                                <span class="pill" onclick="addToNotes('Mandolin')"><i class="fas fa-guitar"></i> Mandolin</span>
+                                <span class="pill" onclick="addToNotes('Harmonica')"><i class="fas fa-music"></i> Harmonica</span>
+                                <span class="pill" onclick="addToNotes('Piano')"><i class="fas fa-keyboard"></i> Piano</span>
+                                <span class="pill" onclick="addToNotes('Drums')"><i class="fas fa-drum"></i> Drums</span>
+                                <span class="pill" onclick="addToNotes('Upright bass')"><i class="fas fa-music"></i> Upright Bass</span>
+                                <span class="pill" onclick="addToNotes('Dobro')"><i class="fas fa-guitar"></i> Dobro</span>
+                                <span class="pill" onclick="addToNotes('Hammond organ')"><i class="fas fa-keyboard"></i> Hammond Organ</span>
+                                <span class="pill" onclick="addToNotes('808 bass')"><i class="fas fa-wave-square"></i> 808 Bass</span>
+                                <span class="pill" onclick="addToNotes('Synth pads')"><i class="fas fa-keyboard"></i> Synth Pads</span>
+                                <span class="pill" onclick="addToNotes('Gang vocals')"><i class="fas fa-users"></i> Gang Vocals</span>
+                                <span class="pill" onclick="addToNotes('Gospel choir')"><i class="fas fa-church"></i> Gospel Choir</span>
+                                <span class="pill" onclick="addToNotes('Hand claps')"><i class="fas fa-hands-clapping"></i> Hand Claps</span>
+                                <span class="pill" onclick="addToNotes('Foot stomps')"><i class="fas fa-shoe-prints"></i> Foot Stomps</span>
+                                <span class="pill" onclick="addToNotes('Talk box')"><i class="fas fa-microphone-alt"></i> Talk Box</span>
+                                <span class="pill" onclick="addToNotes('Auto-tune')"><i class="fas fa-robot"></i> Auto-tune</span>
+                            </div>
+                        </div>
+                        
+                        <div class="instrument-section">
+                            <h4>Tempo, Key & Structure</h4>
+                            <div class="pills-container">
+                                <span class="pill" onclick="addToNotes('Slow tempo (70-90 BPM)')"><i class="fas fa-tachometer-alt"></i> Slow Tempo</span>
+                                <span class="pill" onclick="addToNotes('Mid-tempo (90-110 BPM)')"><i class="fas fa-tachometer-alt"></i> Mid Tempo</span>
+                                <span class="pill" onclick="addToNotes('Upbeat (110-130 BPM)')"><i class="fas fa-tachometer-alt"></i> Upbeat</span>
+                                <span class="pill" onclick="addToNotes('Fast (130+ BPM)')"><i class="fas fa-tachometer-alt"></i> Fast</span>
+                                <span class="pill" onclick="addToNotes('Key of G')"><i class="fas fa-music"></i> Key of G</span>
+                                <span class="pill" onclick="addToNotes('Key of C')"><i class="fas fa-music"></i> Key of C</span>
+                                <span class="pill" onclick="addToNotes('Key of D')"><i class="fas fa-music"></i> Key of D</span>
+                                <span class="pill" onclick="addToNotes('Key of A')"><i class="fas fa-music"></i> Key of A</span>
+                                <span class="pill" onclick="addToNotes('Key of E')"><i class="fas fa-music"></i> Key of E</span>
+                                <span class="pill" onclick="addToNotes('Minor key')"><i class="fas fa-music"></i> Minor Key</span>
+                                <span class="pill" onclick="addToNotes('Call and response')"><i class="fas fa-exchange-alt"></i> Call & Response</span>
+                                <span class="pill" onclick="addToNotes('Key change in final chorus')"><i class="fas fa-chart-line"></i> Key Change</span>
+                                <span class="pill" onclick="addToNotes('Instrumental break')"><i class="fas fa-pause"></i> Instrumental Break</span>
+                                <span class="pill" onclick="addToNotes('A cappella section')"><i class="fas fa-microphone"></i> A Cappella</span>
+                                <span class="pill" onclick="addToNotes('Spoken word section')"><i class="fas fa-comment"></i> Spoken Word</span>
+                            </div>
+                        </div>
+                        
+                        <div class="instrument-section">
+                            <h4>Keywords & Imagery</h4>
+                            <div class="pills-container">
+                                <span class="pill" onclick="addToNotes('Dirt road')"><i class="fas fa-road"></i> Dirt Road</span>
+                                <span class="pill" onclick="addToNotes('Pickup truck')"><i class="fas fa-truck"></i> Pickup Truck</span>
+                                <span class="pill" onclick="addToNotes('Bonfire')"><i class="fas fa-fire"></i> Bonfire</span>
+                                <span class="pill" onclick="addToNotes('Mason jar')"><i class="fas fa-jar"></i> Mason Jar</span>
+                                <span class="pill" onclick="addToNotes('Front porch')"><i class="fas fa-home"></i> Front Porch</span>
+                                <span class="pill" onclick="addToNotes('Whiskey')"><i class="fas fa-glass-whiskey"></i> Whiskey</span>
+                                <span class="pill" onclick="addToNotes('Blue jeans')"><i class="fas fa-tshirt"></i> Blue Jeans</span>
+                                <span class="pill" onclick="addToNotes('Tailgate')"><i class="fas fa-truck-loading"></i> Tailgate</span>
+                                <span class="pill" onclick="addToNotes('Church bells')"><i class="fas fa-church"></i> Church Bells</span>
+                                <span class="pill" onclick="addToNotes('Moonlight')"><i class="fas fa-moon"></i> Moonlight</span>
+                                <span class="pill" onclick="addToNotes('River')"><i class="fas fa-water"></i> River</span>
+                                <span class="pill" onclick="addToNotes('Train tracks')"><i class="fas fa-train"></i> Train Tracks</span>
+                                <span class="pill" onclick="addToNotes('Cornfield')"><i class="fas fa-seedling"></i> Cornfield</span>
+                                <span class="pill" onclick="addToNotes('Stars')"><i class="fas fa-star"></i> Stars</span>
+                                <span class="pill" onclick="addToNotes('Cowboy boots')"><i class="fas fa-boot"></i> Cowboy Boots</span>
+                                <span class="pill" onclick="addToNotes('Radio')"><i class="fas fa-radio"></i> Radio</span>
+                                <span class="pill" onclick="addToNotes('Fishing')"><i class="fas fa-fish"></i> Fishing</span>
+                                <span class="pill" onclick="addToNotes('Sunset')"><i class="fas fa-sun"></i> Sunset</span>
+                                <span class="pill" onclick="addToNotes('Backroads')"><i class="fas fa-route"></i> Backroads</span>
+                                <span class="pill" onclick="addToNotes('County fair')"><i class="fas fa-ticket-alt"></i> County Fair</span>
+                            </div>
+                        </div>
+                        
+                        <div class="instrument-section">
+                            <h4>Topics & Themes</h4>
+                            <div class="pills-container">
+                                <span class="pill" onclick="addToNotes('Small town life')"><i class="fas fa-building"></i> Small Town Life</span>
+                                <span class="pill" onclick="addToNotes('Family traditions')"><i class="fas fa-users"></i> Family Traditions</span>
+                                <span class="pill" onclick="addToNotes('First love')"><i class="fas fa-heart"></i> First Love</span>
+                                <span class="pill" onclick="addToNotes('Heartbreak')"><i class="fas fa-heart-broken"></i> Heartbreak</span>
+                                <span class="pill" onclick="addToNotes('Working hard')"><i class="fas fa-hammer"></i> Working Hard</span>
+                                <span class="pill" onclick="addToNotes('Friday night')"><i class="fas fa-calendar-week"></i> Friday Night</span>
+                                <span class="pill" onclick="addToNotes('Summer memories')"><i class="fas fa-umbrella-beach"></i> Summer Memories</span>
+                                <span class="pill" onclick="addToNotes('Coming home')"><i class="fas fa-home"></i> Coming Home</span>
+                                <span class="pill" onclick="addToNotes('Growing up')"><i class="fas fa-child"></i> Growing Up</span>
+                                <span class="pill" onclick="addToNotes('American pride')"><i class="fas fa-flag-usa"></i> American Pride</span>
+                                <span class="pill" onclick="addToNotes('Lost love')"><i class="fas fa-times-circle"></i> Lost Love</span>
+                                <span class="pill" onclick="addToNotes('Party anthem')"><i class="fas fa-beer"></i> Party Anthem</span>
+                                <span class="pill" onclick="addToNotes('Faith and prayer')"><i class="fas fa-pray"></i> Faith & Prayer</span>
+                                <span class="pill" onclick="addToNotes('Country pride')"><i class="fas fa-hat-cowboy"></i> Country Pride</span>
+                                <span class="pill" onclick="addToNotes('Nostalgia')"><i class="fas fa-clock"></i> Nostalgia</span>
+                                <span class="pill" onclick="addToNotes('Freedom')"><i class="fas fa-dove"></i> Freedom</span>
+                                <span class="pill" onclick="addToNotes('Redemption')"><i class="fas fa-cross"></i> Redemption</span>
+                                <span class="pill" onclick="addToNotes('Drinking song')"><i class="fas fa-wine-bottle"></i> Drinking Song</span>
+                                <span class="pill" onclick="addToNotes('Road trip')"><i class="fas fa-car"></i> Road Trip</span>
+                                <span class="pill" onclick="addToNotes('High school days')"><i class="fas fa-graduation-cap"></i> High School Days</span>
+                            </div>
+                        </div>
+                        
+                        <textarea id="additionalNotes" placeholder="Click elements above or type your own notes here..." class="modern-textarea"></textarea>
+                    </div>
+
+                    <button id="generateBtn" onclick="generateSong()" class="btn-generate">
+                        <i class="fas fa-magic"></i>
+                        <span>Generate Song</span>
+                    </button>
+                </div>
+                </div>
+
+                <div id="loading" class="loading-container" style="display: none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-guitar fa-spin"></i>
+                    </div>
+                    <p>Crafting your song... This may take a moment...</p>
+                </div>
+
+                <div id="output"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

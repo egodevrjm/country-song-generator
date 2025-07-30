@@ -1,0 +1,30 @@
+{
+  "name": "alex-wilson-country-song-generator",
+  "version": "2.6.0",
+  "description": "AI-powered country song generator in the style of Alex Wilson",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["country", "music", "ai", "claude", "songwriting"],
+  "author": "Ryan Morrison",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/country-song-generator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/country-song-generator/issues"
+  },
+  "homepage": "https://github.com/yourusername/country-song-generator#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.0.3",
+    "axios": "^1.4.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
