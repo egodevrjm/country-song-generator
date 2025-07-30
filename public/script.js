@@ -686,7 +686,7 @@ function letClaudeDecideClassic() {
     showNotification('Claude has selected options based on your song configuration!', 'success');
 }
 
-function generateRandomThemeWizard() {
+async function generateRandomThemeWizard() {
     if (!hasApiKey) {
         showNotification('Please set your Claude API key in Settings', 'error');
         return;
