@@ -32,7 +32,7 @@ A modern web application that generates authentic country songs using AI, inspir
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/country-song-generator.git
+git clone https://github.com/egodevrjm/country-song-generator.git
 cd country-song-generator
 ```
 

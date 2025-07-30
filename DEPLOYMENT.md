@@ -12,7 +12,7 @@ This guide will help you deploy the Alex Wilson Country Song Generator to variou
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/country-song-generator.git
+   git clone https://github.com/egodevrjm/country-song-generator.git
    cd country-song-generator
    ```
 
@@ -91,7 +91,7 @@ This guide will help you deploy the Alex Wilson Country Song Generator to variou
 
 4. Clone your repository:
    ```bash
-   git clone https://github.com/yourusername/country-song-generator.git
+   git clone https://github.com/egodevrjm/country-song-generator.git
    cd country-song-generator
    ```
 

@@ -12,12 +12,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/country-song-generator.git"
+    "url": "https://github.com/egodevrjm/country-song-generator.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/country-song-generator/issues"
+    "url": "https://github.com/egodevrjm/country-song-generator/issues"
   },
-  "homepage": "https://github.com/yourusername/country-song-generator#readme",
+  "homepage": "https://github.com/egodevrjm/country-song-generator#readme",
   "dependencies": {
     "express": "^4.18.2",
     "dotenv": "^16.0.3",

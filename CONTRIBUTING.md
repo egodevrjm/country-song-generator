@@ -43,7 +43,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 1. **Set up your development environment**:
    ```bash
-   git clone https://github.com/yourusername/country-song-generator.git
+   git clone https://github.com/egodevrjm/country-song-generator.git
    cd country-song-generator
    npm install
    ```
