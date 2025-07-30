@@ -143,7 +143,17 @@ async function saveApiKeyFromSettings() {
         });
         
         if (!response.ok) {
-            throw new Error('Failed to save API key');
+            const error = await response.json();
+            if (error.instructions) {
+                // Special handling for Vercel
+                showApiKeyStatus(`${error.error}\n${error.instructions}`, 'error');
+                if (error.helpUrl) {
+                    window.open(error.helpUrl, '_blank');
+                }
+            } else {
+                throw new Error(error.error || 'Failed to save API key');
+            }
+            return;
         }
         
         hasApiKey = true;
@@ -736,10 +746,41 @@ async function checkApiKeyStatus() {
         const response = await fetch('/api/check-key');
         const data = await response.json();
         hasApiKey = data.hasKey;
+        
+        // Show Vercel-specific message if needed
+        if (data.isVercel && !data.hasKey) {
+            showVercelInstructions();
+        }
+        
         updateApiKeyUI(hasApiKey);
     } catch (error) {
         console.error('Error checking API key:', error);
     }
+}
+
+// Show Vercel deployment instructions
+function showVercelInstructions() {
+    const notification = document.createElement('div');
+    notification.className = 'notification notification-info';
+    notification.style.maxWidth = '500px';
+    notification.innerHTML = `
+        <i class="fas fa-info-circle"></i>
+        <div>
+            <strong>Running on Vercel</strong><br>
+            <small>To use this app, add your Claude API key in Vercel:<br>
+            1. Go to your Vercel Dashboard<br>
+            2. Settings → Environment Variables<br>
+            3. Add CLAUDE_API_KEY with your key<br>
+            4. Redeploy the app</small>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Keep this notification visible longer
+    setTimeout(() => notification.classList.add('show'), 10);
+    
+    // Don't auto-remove this important message
 }
 
 // Update UI based on API key status

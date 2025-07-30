@@ -14,13 +14,19 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Store API key from environment or from client
-let apiKey = process.env.CLAUDE_API_KEY || '';
+const IS_VERCEL = process.env.VERCEL === '1';
+let apiKey = process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY || '';
 
 // History file path
 const HISTORY_FILE = path.join(__dirname, 'song-history.json');
 
 // Helper functions for history management
 async function loadHistory() {
+    if (IS_VERCEL) {
+        // On Vercel, history is not persisted
+        return [];
+    }
+    
     try {
         const data = await fs.readFile(HISTORY_FILE, 'utf8');
         return JSON.parse(data);
@@ -31,6 +37,12 @@ async function loadHistory() {
 }
 
 async function saveHistory(history) {
+    if (IS_VERCEL) {
+        // On Vercel, we can't save to filesystem
+        console.log('Running on Vercel - history not persisted');
+        return true; // Return true to prevent errors
+    }
+    
     try {
         await fs.writeFile(HISTORY_FILE, JSON.stringify(history, null, 2));
         return true;
@@ -42,6 +54,14 @@ async function saveHistory(history) {
 
 // Endpoint to set API key
 app.post('/api/set-key', (req, res) => {
+    if (IS_VERCEL) {
+        return res.status(400).json({ 
+            error: 'On Vercel: API keys must be set as environment variables',
+            instructions: 'Please add CLAUDE_API_KEY in your Vercel project settings under Environment Variables',
+            helpUrl: 'https://vercel.com/docs/environment-variables'
+        });
+    }
+    
     const { key } = req.body;
     if (key) {
         apiKey = key;
@@ -53,13 +73,23 @@ app.post('/api/set-key', (req, res) => {
 
 // Endpoint to check if API key is set
 app.get('/api/check-key', (req, res) => {
-    res.json({ hasKey: !!apiKey });
+    const hasKey = !!apiKey;
+    res.json({ 
+        hasKey,
+        isVercel: IS_VERCEL,
+        message: IS_VERCEL && !hasKey ? 
+            'Please set CLAUDE_API_KEY in Vercel Environment Variables' : 
+            null
+    });
 });
 
 // Generate random theme
 app.post('/api/generate-theme', async (req, res) => {
     if (!apiKey) {
-        return res.status(401).json({ error: 'API key not set' });
+        const errorMessage = IS_VERCEL ? 
+            'API key not found. Please set CLAUDE_API_KEY in Vercel Environment Variables.' :
+            'API key not set. Please add your key in Settings.';
+        return res.status(401).json({ error: errorMessage });
     }
 
     const { styleValue } = req.body;
@@ -224,7 +254,10 @@ Give me ONLY the hook. Make it thought-provoking and memorable.`;
 // Generate song
 app.post('/api/generate-song', async (req, res) => {
     if (!apiKey) {
-        return res.status(401).json({ error: 'API key not set' });
+        const errorMessage = IS_VERCEL ? 
+            'API key not found. Please set CLAUDE_API_KEY in Vercel Environment Variables.' :
+            'API key not set. Please add your key in Settings.';
+        return res.status(401).json({ error: errorMessage });
     }
 
     const { theme, subgenre, vocalStyle, mood, additionalNotes, styleValue } = req.body;
@@ -424,6 +457,11 @@ DO NOT include any text before or after the JSON object. Remember: Alex writes R
 
 // History endpoints
 app.get('/api/history', async (req, res) => {
+    if (IS_VERCEL) {
+        // Return empty history on Vercel
+        return res.json([]);
+    }
+    
     try {
         const history = await loadHistory();
         res.json(history);
@@ -434,6 +472,11 @@ app.get('/api/history', async (req, res) => {
 });
 
 app.post('/api/history', async (req, res) => {
+    if (IS_VERCEL) {
+        // Acknowledge but don't save on Vercel
+        return res.json({ success: true, message: 'History not persisted on Vercel' });
+    }
+    
     try {
         const historyItem = req.body;
         const history = await loadHistory();
@@ -459,6 +502,10 @@ app.post('/api/history', async (req, res) => {
 });
 
 app.delete('/api/history/:id', async (req, res) => {
+    if (IS_VERCEL) {
+        return res.json({ success: true, message: 'History not persisted on Vercel' });
+    }
+    
     try {
         const { id } = req.params;
         const history = await loadHistory();
@@ -477,6 +524,10 @@ app.delete('/api/history/:id', async (req, res) => {
 });
 
 app.delete('/api/history', async (req, res) => {
+    if (IS_VERCEL) {
+        return res.json({ success: true, message: 'History not persisted on Vercel' });
+    }
+    
     try {
         const saved = await saveHistory([]);
         if (saved) {
@@ -497,5 +548,6 @@ app.listen(PORT, () => {
 🌐 Open your browser to: http://localhost:${PORT}
 📝 API Key: ${apiKey ? 'Set from environment' : 'Not set (you can set it in the app)'}
 🎵 Creating authentic country songs in the style of Pike County's finest!
+${IS_VERCEL ? '☁️  Running on Vercel - API key must be set in environment variables' : ''}
     `);
 });

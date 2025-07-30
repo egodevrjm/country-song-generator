@@ -58,6 +58,36 @@ http://localhost:3000
 
 6. Enter your Claude API key in the Settings (gear icon in the header)
 
+## 🚀 Deploy to Vercel
+
+### Quick Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fegodevrjm%2Fcountry-song-generator)
+
+### Manual Deploy
+
+1. **Fork this repository** to your GitHub account
+
+2. **Import to Vercel**:
+   - Go to [vercel.com](https://vercel.com)
+   - Click "New Project"
+   - Import your forked repository
+
+3. **Set Environment Variable**:
+   - In Vercel project settings
+   - Go to "Environment Variables"
+   - Add: `CLAUDE_API_KEY` = `your-anthropic-api-key`
+   - Select all environments (Production, Preview, Development)
+
+4. **Deploy**:
+   - Click "Deploy"
+   - Your app will be live at `your-project.vercel.app`
+
+### Important Notes for Vercel:
+- Song history is not persisted (serverless limitation)
+- API key must be set via environment variables
+- Cannot save API key through the UI
+
 ## 🎮 How to Use
 
 ### Classic Mode
@@ -123,6 +153,18 @@ country-song-generator/
 - API keys are stored server-side only
 - No sensitive data is stored in localStorage
 - All user inputs are properly sanitized
+
+## 🚀 Deployment
+
+### Vercel Deployment
+
+**Important**: When deploying to Vercel, you must set the API key as an environment variable:
+
+1. Go to Vercel Dashboard → Settings → Environment Variables
+2. Add `CLAUDE_API_KEY` with your Anthropic API key
+3. Redeploy your application
+
+Note: Song history is not persisted on Vercel due to filesystem limitations. See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for detailed instructions.
 
 ## 🤝 Contributing
 
