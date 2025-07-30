@@ -854,46 +854,49 @@ function toggleHistory() {
     }
 }
 
-// Load history from server
+// Load history from localStorage
 async function loadHistory() {
     try {
-        const response = await fetch('/api/history');
-        if (response.ok) {
-            songHistory = await response.json();
-            displayHistory();
+        const savedHistory = localStorage.getItem('songHistory');
+        if (savedHistory) {
+            songHistory = JSON.parse(savedHistory);
+        } else {
+            songHistory = [];
         }
+        displayHistory();
     } catch (error) {
         console.error('Error loading history:', error);
-        showNotification('Failed to load history', 'error');
+        songHistory = [];
+        displayHistory();
     }
 }
 
-// Add song to history (server-side)
+// Add song to history (localStorage)
 async function addToHistory(songData) {
     const historyItem = {
         id: Date.now(),
         date: new Date().toISOString(),
         title: songData.title,
-        theme: document.getElementById('theme').value,
-        styleValue: document.getElementById('styleSlider').value,
+        theme: document.getElementById('theme') ? document.getElementById('theme').value : wizardData.theme,
+        styleValue: document.getElementById('styleSlider') ? document.getElementById('styleSlider').value : wizardData.styleValue,
         songData: songData
     };
     
     try {
-        const response = await fetch('/api/history', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(historyItem)
-        });
+        // Add to beginning of array
+        songHistory.unshift(historyItem);
         
-        if (response.ok) {
-            // Reload history from server to ensure consistency
-            await loadHistory();
-        } else {
-            throw new Error('Failed to save to history');
+        // Keep only last 50 songs
+        if (songHistory.length > 50) {
+            songHistory = songHistory.slice(0, 50);
         }
+        
+        // Save to localStorage
+        localStorage.setItem('songHistory', JSON.stringify(songHistory));
+        
+        // Update display
+        displayHistory();
+        updateHistoryCount();
     } catch (error) {
         console.error('Error saving to history:', error);
         showNotification('Failed to save to history', 'error');
@@ -970,20 +973,21 @@ function loadFromHistory(id) {
     document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Delete from history (server-side)
+// Delete from history (localStorage)
 async function deleteFromHistory(id) {
     if (confirm('Are you sure you want to delete this song from history?')) {
         try {
-            const response = await fetch(`/api/history/${id}`, {
-                method: 'DELETE'
-            });
+            // Filter out the item
+            songHistory = songHistory.filter(item => item.id !== id);
             
-            if (response.ok) {
-                await loadHistory();
-                showNotification('Song deleted from history', 'success');
-            } else {
-                throw new Error('Failed to delete');
-            }
+            // Save to localStorage
+            localStorage.setItem('songHistory', JSON.stringify(songHistory));
+            
+            // Update display
+            displayHistory();
+            updateHistoryCount();
+            
+            showNotification('Song deleted from history', 'success');
         } catch (error) {
             console.error('Error deleting from history:', error);
             showNotification('Failed to delete from history', 'error');
@@ -991,20 +995,21 @@ async function deleteFromHistory(id) {
     }
 }
 
-// Clear all history (server-side)
+// Clear all history (localStorage)
 async function clearAllHistory() {
     if (confirm('Are you sure you want to clear all song history? This cannot be undone.')) {
         try {
-            const response = await fetch('/api/history', {
-                method: 'DELETE'
-            });
+            // Clear the array
+            songHistory = [];
             
-            if (response.ok) {
-                await loadHistory();
-                showNotification('All history cleared', 'success');
-            } else {
-                throw new Error('Failed to clear history');
-            }
+            // Remove from localStorage
+            localStorage.removeItem('songHistory');
+            
+            // Update display
+            displayHistory();
+            updateHistoryCount();
+            
+            showNotification('All history cleared', 'success');
         } catch (error) {
             console.error('Error clearing history:', error);
             showNotification('Failed to clear history', 'error');
